@@ -82,6 +82,22 @@ static NSString * const OCKAttributeNameDayIndex = @"numberOfDaysSinceStart";
     return nil;
 }
 
++ (instancetype)defaultStore {
+        static OCKCarePlanStore *sharedStore = nil;
+        static dispatch_once_t storeToken;
+        dispatch_once(&storeToken, ^{
+                NSFileManager *fileManager = [NSFileManager defaultManager];
+                NSURL *documentDirectory = [fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask].firstObject;
+                NSURL *storeURL = [documentDirectory URLByAppendingPathComponent:@"CarePlanStore"];
+                if (![fileManager fileExistsAtPath:storeURL.path]) {
+                        [fileManager createDirectoryAtURL:storeURL withIntermediateDirectories:YES attributes:nil error:nil];
+                    }
+                sharedStore = [[self alloc] initWithPersistenceDirectoryURL:storeURL];
+            });
+        return sharedStore;
+}
+
+
 - (instancetype)initWithPersistenceDirectoryURL:(NSURL *)url {
     NSAssert([NSThread currentThread].isMainThread, @"OCKCarePlanStore initialization must be on main thread");
     OCKThrowInvalidArgumentExceptionIfNil(url);
